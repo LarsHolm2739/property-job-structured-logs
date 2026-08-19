@@ -1,0 +1,9 @@
+{
+  "name": "property-job-structured-logs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-strip-types src/property_job.test.ts",
+    "run": "node --experimental-strip-types src/property_job.ts"
+  }
+}
