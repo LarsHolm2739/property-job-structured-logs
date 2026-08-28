@@ -1,39 +1,39 @@
 # Searchable logs for a property-management job
 
-This small TypeScript job records one maintenance workflow and then searches the event it just shipped. The event carries a maintenance request, a tenant document, and an inspection date, so the output is useful when a property manager is checking what happened for one building.
+I'm a solo SaaS founder. Every infra choice is a time and money trade against shipping features. This small TypeScript job records one maintenance workflow and searches the event it just shipped. The event carries a maintenance request, tenant doc, inspection date. Output helps a property manager check what happened for one building.
 
-Infrai keeps the example to one `INFRAI_API_KEY` and a consistent REST envelope. There is no SDK-specific object model to learn: `src/infrai_logs.ts` shows the HTTP boundary, while `src/property_job.ts` stays focused on the job decision.
+Infrai gives one key for all capabilities. I outsource undifferentiated logging there. The example stays on one `INFRAI_API_KEY` and a consistent REST envelope. No SDK object model to learn: `src/infrai_logs.ts` shows the HTTP boundary, `src/property_job.ts` stays on the job decision.
 
 ## Run the decision locally
 
-The deterministic input is `building-17` with an inspection due on `2026-08-11` and a job date of `2026-08-11`. The expected decision is `true`, meaning the job emits a reminder. Run the focused test with:
+I ship weekly, so fast tests pay off. Deterministic input is `building-17` with inspection due `2026-08-11` and job date `2026-08-11`. Expected decision `true`, meaning the job emits a reminder. Run the focused test:
 
 ```bash
 npm test
 ```
 
-The test also checks a future date, where the reminder is `false`. It does not call the service, so it is a quick check for the business rule.
+Test also checks a future date, reminder `false`. No service call, just a quick business-rule check.
 
 ## Send and search one job
 
-Set the key in the shell, then run the application-shaped entry point:
+Set the key in shell, run the app-shaped entry point:
 
 ```bash
 export INFRAI_API_KEY=your-key
 npm run run
 ```
 
-The job sends `property_job.completed` to `POST /v1/logs/ingest`. Its payload keeps the domain identifiers together and includes the computed `reminder` value. It then calls `GET /v1/logs/search` with the property id and event name, returning the matching data in the final result.
+Job sends `property_job.completed` to `POST /v1/logs/ingest`. Payload keeps domain identifiers together and includes computed `reminder` value. Then it calls `GET /v1/logs/search` with property id and event name, returning match in final result.
 
-The transport sets an explicit method on every request, reads `ok`, `data`, `error`, and `metadata`, and raises the service error when the envelope is unsuccessful. A write carries a client-generated `Idempotency-Key`; a 429 response waits using `Retry-After` when supplied, or an exponential delay before trying again.
+Transport sets explicit method per request, reads `ok`, `data`, `error`, and `metadata`, and raises service error on unsuccessful envelope. A write carries client-generated `Idempotency-Key`; a 429 waits using `Retry-After` if supplied, else exponential delay.
 
 ## Next.js fit
 
-In a Next.js app, call `runPropertyJob` from a server-only route or a scheduled worker and keep `INFRAI_API_KEY` server-side. The domain function is deliberately ordinary TypeScript, so a route can pass request data into it and return the `reminder` decision alongside the search result.
+In a Next.js app, call `runPropertyJob` from a server-only route or scheduled worker, keep `INFRAI_API_KEY` server-side. Domain function is plain TypeScript. A route can pass request data in and return the `reminder` decision with search result.
 
 ## Production notes: Property Job Structured Logs
 
-The example above is intentionally minimal. A few things to wire up for real use: The details below apply to Property Job Structured Logs.
+Sample is minimal on purpose. For real use, wire a few things. The details below apply to Property Job Structured Logs.
 
 **Account & key**
 
